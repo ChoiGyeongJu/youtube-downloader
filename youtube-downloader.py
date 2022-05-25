@@ -30,7 +30,6 @@ def download_video(urls, saveDir, n):   # n은 다운 받을 비디오 갯수
 
 
 def play_video_by_local(video_dir):  # local 비디오 재생 코드
-    # video_dir = "C:/Users/82102/OneDrive/바탕 화면/" + '[재택플러스] 월드스타 손흥민‥경제적 가치는 (20220524뉴스투데이MBC)' + '.mp4'
     cap = cv.VideoCapture(video_dir)
 
     fps = cap.get(cv.CAP_PROP_FPS)   # 초당 몇프레임인지 
@@ -168,14 +167,14 @@ if __name__=='__main__':
 
     # print(url_list)
 
-    # download_video(url_list,"C:/Users/82102/OneDrive/바탕 화면" , 1)
+    # download_video(url_list,"영상 저장할 경로" , 1)
     
-    # play_video_by_local("C:/Users/82102/OneDrive/바탕 화면/[재택플러스] 월드스타 손흥민‥경제적 가치는 (20220524뉴스투데이MBC).mp4")
+    # play_video_by_local("영상 경로/파일명.mp4")
     # play_video_by_url(url_list[0])
 
-    # capture_image_by_local("C:/Users/82102/OneDrive/바탕 화면/[재택플러스] 월드스타 손흥민‥경제적 가치는 (20220524뉴스투데이MBC).mp4", 40, image_save_dir, KeyWord)
+    # capture_image_by_local("영상 경로/파일명.mp4", 40, image_save_dir, KeyWord)
     # capture_image_by_url(url_list[1], 45, image_save_dir, KeyWord)
 
 
-    url = "https://www.youtube.com/watch?v=4TWR90KJl84"
-    video_download_partially(url, "C:/Users/82102/Videos/rudwn")
+    url = "영상 youtue url 입력"
+    video_download_partially(url, "영상 저장할 경로")
