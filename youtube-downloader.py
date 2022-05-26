@@ -1,4 +1,4 @@
-from pyparsing import Keyword
+from time import sleep
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
@@ -11,6 +11,14 @@ from matplotlib import pyplot as plt
 import pafy
 import math
 import os, sys
+from os import path
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('directory already exists')
 
 
 def download_video(urls, saveDir, n):   # n은 다운 받을 비디오 갯수
@@ -81,7 +89,7 @@ def capture_image_by_local(video_dir, sec, saveDir):  # local 비디오 캡처 �
         frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
         if (ret == True):
-            OUTPUT_IMAGE_PATH =  saveDir + '/' + str(KeyWord) + str(cnt) + '.jpg'
+            OUTPUT_IMAGE_PATH =  saveDir + '/' + str(KeyWord) + str(cnt + 1) + '.jpg'
             plt.imsave(OUTPUT_IMAGE_PATH, frame)
             frame_num += math.floor(fps*sec)
         else:
@@ -115,7 +123,7 @@ def capture_image_by_url(video_url, sec, saveDir, KeyWord):  # url 비디오 캡
         frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
         if ret == True:
-            OUTPUT_IMAGE_PATH =  saveDir + '/' + str(KeyWord) + str(cnt) + '.jpg'
+            OUTPUT_IMAGE_PATH =  saveDir + '/' + str(KeyWord) + str(cnt + 1) + '.jpg'
             plt.imsave(OUTPUT_IMAGE_PATH, frame)
             frame_num += math.floor(fps*sec)
         else:
@@ -125,56 +133,75 @@ def capture_image_by_url(video_url, sec, saveDir, KeyWord):  # url 비디오 캡
     print('======캡처가 완료되었습니다======')
 
 
-def video_download_partially(video_url, saveDir):  # 영상 구간으로 다운하는거, saveDir 경로로 영상 저장됌
-    # code = f'youtube-dl --external-downloader ffmpeg --external-downloader-args "-ss 00:01:00 -to 00:01:04"\
-    #      -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio" --merge-output-format mp4 {video_url}'  # 화질 좋은 영상 + 소리
+def video_download_partially(video_url, saveDir, n):  # 영상 구간으로 다운하는거, saveDir 경로로 n개의 영상 저장됌
+    for i in range(len(video_url)):
+        if i == n:
+            break
+        # code = f'cd {saveDir} && youtube-dl --external-downloader ffmpeg --external-downloader-args "-ss 00:01:00 -to 00:01:04"\
+        #      -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio" --merge-output-format mp4 {video_url[i]}'  # 화질 좋은 영상 + 소리
 
-    code = f'cd {saveDir} && youtube-dl --external-downloader ffmpeg --external-downloader-args "-ss 00:01:00 -to 00:01:04" -f best {video_url}'   # 화질 안좋은 영상 + 소리
+        # code = f'cd {saveDir} && youtube-dl --external-downloader ffmpeg --external-downloader-args "-ss 00:01:00 -to 00:01:10" -f best {video_url[i]}'   # 화질 안좋은 영상 + 소리
 
-    # code = f'youtube-dl --external-downloader ffmpeg --external-downloader-args "-ss 00:01:00 -to 00:01:04" -f bestvideo {video_url}'   # 소리 X
+        code = f'cd {saveDir} && youtube-dl --external-downloader ffmpeg --external-downloader-args "-ss 00:01:00 -to 00:01:04" -f "bestvideo[height<=720]" {video_url[i]}'   # 소리 X
+        
+        os.system(code)
 
+
+def video_stream(video_url):
+    code = f'youtube-dl --get-url --format best "{video_url}" | vlc -'
     os.system(code)
 
 
-
 if __name__=='__main__':
-    # options = webdriver.ChromeOptions()
-    # options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    # browser = webdriver.Chrome(ChromeDriverManager().install() ,options=options)
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')  
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    browser = webdriver.Chrome(ChromeDriverManager().install() ,options=options)
 
-    # KeyWord    = input('검색어를 입력하세요 = ')
-    # search_url = "https://www.youtube.com/results?search_query=" + KeyWord
+    KeyWord    = input('검색어를 입력하세요 = ')
+    Video_num  = int(input('검색할 비디오 갯수를 입력하세요 = '))
+    search_url = "https://www.youtube.com/results?search_query=" + KeyWord
 
-    # image_save_dir = "C:/Users/82102/OneDrive/바탕 화면/" + KeyWord + '/images'
+    root_dir = "C:/Users/82102/OneDrive/바탕 화면/" + KeyWord
+    image_save_dir = "C:/Users/82102/OneDrive/바탕 화면/youtube_" + KeyWord + '/images'
+    video_save_dir = "C:/Users/82102/OneDrive/바탕 화면/youtube_" + KeyWord + '/videos'
 
-    # os.mkdir("C:/Users/82102/OneDrive/바탕 화면/" + KeyWord)
-    # os.mkdir(image_save_dir)
+    if path.isdir(root_dir) == False:
+        createFolder("C:/Users/82102/OneDrive/바탕 화면/youtube_" + KeyWord)
+        os.mkdir(image_save_dir)
+        os.mkdir(video_save_dir)
+    else:
+        print('동일한 이름의 폴더가 존재합니다.')
+        sys.exit(0)
 
-    # browser.get(search_url)
+    browser.get(search_url)
     # browser.maximize_window()
 
-    # soup = bs(browser.page_source, "lxml")
+    url_list       = []
+    titles         = []
+    thumbnails     = []
 
-    # video_link_data = browser.find_elements(By.ID,  'video-title')
-    
-    # url_list       = []
-    # titles         = []
-    # thumbnails     = []
+    while len(url_list) <= Video_num:      # 몇개의 영상 url을 받아올건지
+        browser.execute_script("window.scrollTo(0, window.scrollY + 8000);")
+        sleep(1)
+        # soup = bs(browser.page_source, "lxml")
+        video_link_data = browser.find_elements(By.ID,  'video-title')
 
-    # for i in video_link_data:
-    #     if i.get_attribute('href') != None:
-    #         url_list.append(i.get_attribute('href'))  # urls에 url 목록 저장
-
-    # print(url_list)
+        for i in video_link_data:
+            if (i.get_attribute('href') != None) & (i.get_attribute('href') not in url_list):
+                url_list.append(i.get_attribute('href'))  # url_list에 url 목록 저장
+    url_list = url_list[0:Video_num]
+    print(url_list)
 
     # download_video(url_list,"영상 저장할 경로" , 1)
-    
+    video_download_partially(url_list, video_save_dir, Video_num)
+
     # play_video_by_local("영상 경로/파일명.mp4")
     # play_video_by_url(url_list[0])
 
     # capture_image_by_local("영상 경로/파일명.mp4", 40, image_save_dir, KeyWord)
     # capture_image_by_url(url_list[1], 45, image_save_dir, KeyWord)
-
-
-    url = "영상 youtue url 입력"
-    video_download_partially(url, "영상 저장할 경로")
+    
+    # video_stream("https://www.youtube.com/watch?v=4TWR90KJl84")
